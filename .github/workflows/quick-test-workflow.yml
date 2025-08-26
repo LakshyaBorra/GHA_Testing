@@ -1,0 +1,46 @@
+name: Quick Model Registration Test
+
+on:
+  workflow_dispatch:
+
+env:
+  MODEL_API_URL: "https://backoffice.dev.api.discomax.com/mlp-metadata-manager/meta-manager"
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test API Access
+        run: |
+          echo "🔍 Testing API access from this repository..."
+          
+          curl -X POST "${{ env.MODEL_API_URL }}/v1/models/register" \
+               -H "Content-Type: application/json" \
+               -d '{
+                 "model_name": "test-access",
+                 "variant": "github-test-'$(date +%s)'",
+                 "owner_team": "personalization", 
+                 "omd_business_service": "content-discovery",
+                 "related_features": {},
+                 "inference_configuration": {"response_item_limit": -1},
+                 "serving_configuration": {
+                   "autoscaling": true,
+                   "autoscale_conditions": {"rps": 20},
+                   "min_instance": 1,
+                   "max_instance": 5,
+                   "machine_type": "ml.c5.xlarge",
+                   "processor": "cpu",
+                   "framework": {
+                     "framework_name": "tensorflow",
+                     "framework_version": "2.9.2"
+                   },
+                   "shadow_config": {}
+                 },
+                 "serving_regions": ["us-east-1"]
+               }' \
+               -w "Status: %{http_code}\n" || echo "Request completed"
+          
+          echo ""
+          echo "📊 Result:"
+          echo "- If you see Status: 201 → Repository has AWS access ✅"
+          echo "- If you see Status: 403 → Repository lacks AWS access ❌"
