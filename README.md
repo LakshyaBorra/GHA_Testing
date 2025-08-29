@@ -1,4 +1,4 @@
-## 🔄 Choosing Between Register and Update
+## 🔄 Choosing Between Register and Update for testing
 
 This workflow supports two actions:
 
